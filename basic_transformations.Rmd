@@ -1,0 +1,103 @@
+---
+title: "transformations"
+output: html_document
+date: "2025-10-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lineáris transzformációk
+
+Centrálás - mean centering:
+Minden értékből kivonjuk az átlagot
+Regresszióban, hogy az intercept értelmezhető legyen használjuk pl.
+
+
+```{r centrálás}
+set.seed(123)
+x <- rchisq(100, df = 3)
+cat("Data mean:", mean(x), "\n")
+
+x_centered <- scale(x, center = TRUE, scale = FALSE)
+cat("Centered mean:", mean(x_centered))
+
+# Vis
+hist(x, main="Data", col="gray", breaks=15)
+abline(v = mean(x), col="red")
+
+hist(x_centered, main="Centered", col="gray", breaks=15)
+abline(v = mean(x_centered), col="red")
+```
+Skálázás - scaling:
+Osztás a szórással
+
+```{r}
+x_scaled <- scale(x, center = FALSE, scale = TRUE)
+
+cat("Data sd:", sd(x), "\n")
+cat("Scaled sd:", sd(x_scaled), "\n")
+cat("Scaled mean:", mean(x_scaled))
+
+
+# Vis
+hist(x, main="Data", col="gray", breaks=15)
+abline(v = mean(x), col="red")
+
+hist(x_scaled, main="Scaled", col="gray", breaks=15)
+abline(v = mean(x_scaled), col="red")
+```
+Z-transzformáció/normalizálás - z-score transformation:
+centrálás és skálázás
+Pl. fMRI-nél voxelwise baseline-intenzitás különbségek eltűnnek, ha z-score-ra váltjuk
+Regressziós elemzéskor, ha a prediktorok nagyságrendileg eltérő mértékegységek, pl. a egy regresszióban az egyik prediktor ezredmásodperc (RT), a másik pontszám 0–100, akkor a nagyobb skálájú változó dominálhat a becslésben (különösen regularizált modellekben: ridge/lasso)
+
+```{r}
+z <- scale(x)  # vagy explicit: (x - mean(x))/sd(x)
+
+cat("Z mean:", mean(z))
+
+# Vis
+hist(x, main="Data", col="gray", breaks=15)
+abline(v = mean(x), col="red")
+
+hist(z, main="Z-transformed", col="gray", breaks=15)
+abline(v = mean(z), col="red")
+```
+
+Min-max skálázás - min-max scaling:
+0-1 közé esik így
+```{r}
+x_norm <- (x - min(x)) / (max(x) - min(x))
+cat("Normalized mean:", mean(x_norm), "\n")
+
+# Vis
+hist(x_norm, main="Data", col="gray", breaks=15)
+abline(v = mean(x_norm), col="red")
+```
+
+
+
+
+## Nem-lineáris transzformáció
+
+Log-transzformáció
+
+Akkor használjuk, ha az adatok pozitívan ferde eloszlásúak vagy nagy tartományban szóródnak az értékek
+
+
+```{r }
+x_log <- log(x)
+
+cat("log mean:", mean(x_log))
+
+
+# Vis
+hist(x, main="Data", col="gray", breaks=15)
+abline(v = mean(x), col="red")
+
+hist(x_log, main="log-transformed", col="gray", breaks=15)
+abline(v = mean(x_log), col="red")
+
+```
