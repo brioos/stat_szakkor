@@ -41,7 +41,7 @@ perm_test_result <- oneway_test(c(B, A) ~ factor(rep(c("B", "A"), each = 5)),
                                  distribution = approximate(nresample = 10000))
 perm_test_result
 
-hist(perm_diffs, main = "Permutációs eloszlás", xlab = "Különbség az átlagok között", border = "white", col = "lightblue", breaks = 50)
+hist(perm_diffs, main = "Permutációs eloszlás", xlab = "Átlagkülönbség", border = "white", col = "lightblue", breaks = 50)
 abline(v = obs_diff, col = "red", lwd = 2)
 
 ```
@@ -62,7 +62,7 @@ ci
 hist(boot_diffs,
      breaks = 50,
      col = "lightblue",
-     main = "Bootstrap eloszlás az átlagkülönbségre (B - A)",
+     main = "Bootstrap eloszlás)",
      xlab = "Átlagkülönbség",
      border = "white")
 
