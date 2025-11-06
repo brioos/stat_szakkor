@@ -1,0 +1,78 @@
+---
+title: "bootstrap-permutation"
+output: html_document
+date: "2025-11-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Permutációs teszt
+
+Szignifikancia tesztelés alternatívája.
+
+```{r AB}
+A <- c(5, 6, 7, 4, 6)
+B <- c(8, 9, 7, 10, 9)
+
+set.seed(123)
+obs_diff <- mean(B) - mean(A)  # megfigyelt különbség
+obs_diff
+
+
+# permutációs eloszlás 10000 újracímkézéssel
+all_values <- c(A, B)
+nA <- length(A)
+perm_diffs <- replicate(10000, {
+  shuffled <- sample(all_values) # véletlen keverés
+  mean(shuffled[(nA+1):length(all_values)]) - mean(shuffled[1:nA]) # az első öt elem lesz az A csoport, a második 5 a B csoport
+})
+
+# p-érték: hányszor kapunk legalább ekkora különbséget?
+mean(perm_diffs >= obs_diff) # ez a >= jel mindegyikre FALSE TRUE-t ad, a mean pedig a TRUE-k arányát adja vissza pl (2 / 5) = 0.4
+```
+
+
+```{r function}
+# ugyanez egyszerű function-ként
+library(survival)
+perm_test_result <- oneway_test(c(B, A) ~ factor(rep(c("B", "A"), each = 5)),
+                                 distribution = approximate(nresample = 10000))
+perm_test_result
+
+hist(perm_diffs, main = "Permutációs eloszlás", xlab = "Különbség az átlagok között", border = "white", col = "lightblue", breaks = 50)
+abline(v = obs_diff, col = "red", lwd = 2)
+
+```
+
+## Bootstrap
+Mintavételezési variabilitást teszteli, a becslés bizonytalanságát mutatja. Ha újra begyűjteném az adatokat ugyanígy,a becsült érték valószínűleg ebbe a tartományba (CI) esne
+
+```{r}
+set.seed(123)
+boot_diffs <- replicate(10000, {
+  mean(sample(B, replace = TRUE)) - mean(sample(A, replace = TRUE)) # random minta B-ből - helyettesítés azt jelenti, hogy ugyanazt az elemet többször is kiválaszthatjuk, pl. B-ből ua. az elem többször bekerülhet az új mintába
+})
+
+# konfidenciaintervallum
+ci <- quantile(boot_diffs, c(0.025, 0.975))
+ci
+
+hist(boot_diffs,
+     breaks = 50,
+     col = "lightblue",
+     main = "Bootstrap eloszlás az átlagkülönbségre (B - A)",
+     xlab = "Átlagkülönbség",
+     border = "white")
+
+# Megfigyelt különbség pirossal
+abline(v = mean(B) - mean(A), col = "red", lwd = 2)
+# 95% konfidenciaintervallum zölddel
+abline(v = ci, col = "darkgreen", lwd = 2, lty = 2)
+
+
+
+
+```
+
